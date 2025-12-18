@@ -12,11 +12,8 @@ import modlog
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
 import chemio
-from gase.aseshell import AtomsShell
-from gase.generator.reaction_positions import get_low_repulsion_points, REP_spherical_opt
-import gase.ts.neb
+from reaction_positions import get_low_repulsion_points, REP_spherical_opt
 
-import gase.db.use_sqlite3 as database
 
 # from verifyneb import verifyMEP, verifyActiveSite
 import pdb
@@ -42,23 +39,6 @@ def get_tmpdir():
         tmpdir = tempfile.mkdtemp()
     print("Temp dir:", tmpdir)
     return tmpdir
-
-
-def initialize_db():
-    global atoms_pool, reaction_map, run1_runed, run2_runed, neb_images
-    for name in ['atoms_pool', 'reaction_map', 'runed', 'neb_images', 'unopted_neb_images']:
-        database.create_table(name)
-    atoms_pool = dict(database.read('atoms_pool'))
-    neb_images = dict(database.read('neb_images'))
-
-    reaction_map = database.read('reaction_map', 'rmap') or {}
-    run1_runed = database.read('runed', 'run1_runed') or []
-    run2_runed = database.read('runed', 'run2_runed') or []
-
-
-def terminate():
-    global _terminate
-    _terminate = True
 
 
 def test_is_surface(atoms):
@@ -279,44 +259,10 @@ default_exec_arrays = {
 }
 
 
-def get_gase(atoms,
-             calc_arrays=default_force_calc_arrays,
-             exec_arrays=default_exec_arrays):
-    import copy
-    arrays = copy.deepcopy(atoms.arrays)
-    arrays = chemio.read(arrays)
-    arrays['calc_arrays'] = calc_arrays
-    arrays['exec_arrays'] = exec_arrays
-    constraints = atoms.constraints.copy()
-    atoms = AtomsShell(arrays=arrays)
-    atoms.constraints = constraints
-    _ = atoms.calc
-    return atoms
 
 
 class OptimizationError(Exception):
     pass
-
-
-def optimize_structure(
-        atoms,
-        opt_calc_arrays=default_opt_calc_arrays,
-        exec_arrays=default_exec_arrays):
-    newatoms = get_gase(atoms,
-                        calc_arrays=opt_calc_arrays,
-                        exec_arrays=exec_arrays)
-    # pdb.set_trace()
-    old_positions = newatoms.get_positions()
-    # try:
-    if True:
-        newatoms.get_forces(apply_constraint=False)
-        opt_positions = newatoms.calc.get_all_positions()
-        if opt_positions is not None:
-            opt_positions = np.vstack(([old_positions], opt_positions))
-    # except Exception as e:
-    #     raise OptimizationError(e)
-    # newatoms=get_assemble_atoms(newatoms)
-    return newatoms, opt_positions
 
 
 def sopt_optimize_structure(
@@ -325,12 +271,6 @@ def sopt_optimize_structure(
         trajectory=None,
         force_calc_arrays=default_force_calc_arrays,
         exec_arrays=default_exec_arrays):
-    # target = get_gase(target,
-    #                   force_calc_arrays,
-    #                   exec_arrays)
-    # anchor = get_gase(anchor,
-    #                   force_calc_arrays,
-    #                   exec_arrays)
     target, anchor = gase.ts.neb.run_sopt(
         target, anchor, trajectory=trajectory,
         sopt_steps=50, sopt_fmax=0.2)

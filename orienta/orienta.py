@@ -48,8 +48,8 @@ def constrainted_opt_until_bond_break(mol):
 
 def main(mol1, mol2, site1, site2, bond_length=None, charge=0,
          output="", run_opt=False, run_neb=False, nimages=5):
-    from .double_mol_reaction import run_2atoms_with_sites
-    from .utils import sopt_optimize_structure
+    from double_mol_reaction import run_2atoms_with_sites
+    from utils import sopt_optimize_structure
 
     mol1 = read_mol(mol1)
     mol2 = read_mol(mol2)
@@ -58,7 +58,7 @@ def main(mol1, mol2, site1, site2, bond_length=None, charge=0,
     # if len(site2) == 1:
     #     site2 = site2[0]
     print("INPUT Bond length:", bond_length)
-    init_start, init_end, drag_init_end, drag_images = run_2atoms_with_sites(
+    init_start, init_end, _, _ = run_2atoms_with_sites(
         mol1, mol2,
         site1[0] if len(site1) == 1 else site1,
         site2[0] if len(site2) == 1 else site2, bond_length)
