@@ -27,10 +27,10 @@ Then orienta will find molecule minimum repulsion and merge two molecule with sp
 If you want to make `C2H4` react with `H2`, you can use
 
 ```bash
-python -u ~/atomse/gase/renet/orienta.py C2H4 H2 --site1 0 1 --site2 0 1 --output 3 --charge 0 --run_opt --run_neb --nimages 5
+python -u ~/atomse/gase/renet/orienta.py C2H4.xyz H2.xyz --site1 0 1 --site2 0 1 --output 3 --charge 0 --run_opt --run_neb --nimages 5
 ```
 
-Orienta will use ASE to create `C2H4` and `H2` molecule structure, dock `H2` molecule parallel with `C2H4` two Carbon atoms, creating structure `End` and `Start`.
+Orienta will use `C2H4` and `H2` molecule structure, dock `H2` molecule parallel with `C2H4` two Carbon atoms, creating structure `End` and `Start`.
 
 
 
